@@ -26,8 +26,11 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
       - name: Build JAR
-        run: ./gradlew clean build -x test
+        run: sudo ./gradlew clean build -x test
 
       - name: Login GHCR
         run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USER }} --password-stdin
