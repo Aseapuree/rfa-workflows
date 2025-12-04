@@ -1,0 +1,41 @@
+name: Reusable Java Build
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        type: string
+        required: true
+    secrets:
+      GHCR_TOKEN:
+        required: true
+      GHCR_USER:
+        required: true
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build JAR
+        run: ./gradlew clean build -x test
+
+      - name: Login GHCR
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ secrets.GHCR_USER }} --password-stdin
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ghcr.io/${{ secrets.GHCR_USER }}/${{ inputs.service_name }}:latest .
+
+      - name: Push Docker Image
+        run: |
+          docker push ghcr.io/${{ secrets.GHCR_USER }}/${{ inputs.service_name }}:latest
