@@ -6,11 +6,6 @@ on:
       service_name:
         type: string
         required: true
-    secrets:
-      GHCR_TOKEN:
-        required: true
-      GHCR_USER:
-        required: true
 
 
 permissions:
