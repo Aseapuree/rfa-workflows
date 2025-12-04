@@ -12,6 +12,11 @@ on:
       GHCR_USER:
         required: true
 
+
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
