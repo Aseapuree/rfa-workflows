@@ -1,0 +1,51 @@
+name: Reusable Angular Build
+
+on:
+  workflow_call:
+    inputs:
+      service_name:
+        type: string
+        required: true
+    secrets:
+      GHCR_TOKEN:
+        required: true
+      GHCR_USER:
+        required: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular
+        run: npm run build --prod
+
+      - name: Login GHCR
+        env:
+          GHCR_USER: ${{ secrets.GHCR_USER }}
+          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+        run: |
+          echo "${GHCR_TOKEN}" | docker login ghcr.io -u ${GHCR_USER} --password-stdin
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ghcr.io/${{ secrets.GHCR_USER }}/${{ inputs.service_name }}:latest .
+
+      - name: Push Docker Image
+        run: |
+          docker push ghcr.io/${{ secrets.GHCR_USER }}/${{ inputs.service_name }}:latest

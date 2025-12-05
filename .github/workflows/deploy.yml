@@ -6,33 +6,21 @@ on:
       service_name:
         required: true
         type: string
-      compose_path:
-        required: true
-        type: string
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout orchestrator repo
-        uses: actions/checkout@v4
-
-      - name: Connect & Deploy on EC2
+      - name: Deploy service to EC2
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            echo ">>> Actualizando servicio ${{ inputs.service_name }}"
-
-            cd ${{ inputs.compose_path }}
-
-            # Actualiza solo la imagen del microservicio
-            docker compose pull ${{ inputs.service_name }}
-
-            # Levanta solo ese servicio
-            docker compose up -d ${{ inputs.service_name }}
-
+            echo ">>> Deploying ${{ inputs.service_name }} ..."
+            cd /opt/prorfa
+            git pull
+            ./scripts/update-service.sh ${{ inputs.service_name }}
             echo ">>> Deploy completado."
