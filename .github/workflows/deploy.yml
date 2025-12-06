@@ -21,6 +21,5 @@ jobs:
           script: |
             echo ">>> Deploying ${{ inputs.service_name }} ..."
             cd /opt/prorfa
-            git pull
             ./scripts/update-service.sh ${{ inputs.service_name }}
             echo ">>> Deploy completado."
